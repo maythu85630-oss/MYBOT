@@ -45,14 +45,9 @@ COLOR_SEQUENCE = ["🟢","🟢","🟡","🟡","🔴","🔴"]
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_photo(
         photo=open("start.jpg", "rb"),
-        caption="Office Secret Auto Bot မှ ကြိုဆိုပါတယ် 👋"
+        caption="Welcome To Office Secret Auto Bot  👋"
     )
 
-    keyboard = [[InlineKeyboardButton("နံပါတ်ရွေးချယ်ပါ", callback_data="choose_number")]]
-    await update.message.reply_text(
-        "နံပါတ်ကို 1 မှ 200 အထိ ရိုက်ထည့်နိုင်ပါတယ်။",
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
 
 # ---------------- PROCESS NUMBER ----------------
 async def process_star(number_key: str, update_obj, context: ContextTypes.DEFAULT_TYPE):
@@ -90,7 +85,7 @@ async def process_star(number_key: str, update_obj, context: ContextTypes.DEFAUL
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    await query.message.reply_text("နံပါတ်ကို 1 မှ 200 အထိ ရိုက်ထည့်ပါ။")
+    await query.message.reply_text("ID နံပါတ် 1 မှ 111 ထိနှစ်သက်ရာနံပါတ်ကိုရေးပို့ပါ")
 
 # ---------------- MESSAGE HANDLER ----------------
 async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
