@@ -1,13 +1,14 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, MessageHandler, ContextTypes, filters
 from datetime import datetime
+import os
+
 # ---------- CONFIG ----------
 API_ID = 38016148            # my.telegram.org မှ
 API_HASH = "2239cc376facdb84cb5b7f2f1d7bf002"
-
 BOT_TOKEN = "8431786252:AAFFLfJiExGfB7FRulS_Pl83XUO_PXME6cQ"
 
-# Provided employee list from you
+# Provided employee list
 EMPLOYEES = [
     "SHANE ARKAR", "SAN SAN HLAING", "SAI WIN MYINT", "PAN WINT HLWAR", "NWAY NWAY OO",
     "ZIN KO KHANT", "WAH WAH HLAING", "WUTT YI", "NAN EI SWE", "NAY MYO AUNG",
@@ -34,19 +35,22 @@ EMPLOYEES = [
     "LAMIN THIDAR HTWE"
 ]
 
-# fill up to 200
+# Fill up to 200
 while len(EMPLOYEES) < 200:
     EMPLOYEES.append(f"Employee{len(EMPLOYEES)+1}")
 
-COLOR_SEQUENCE = ["🟢","🟢","🟡","🟡","🔴","🔴"]
+COLOR_SEQUENCE = ["🟢", "🟢", "🟡", "🟡", "🔴", "🔴"]
 
 # ---------------- START ----------------
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # 📷 ပုံအရင်ပို့
-    await update.message.reply_photo(
-        photo=open("start.jpg", "rb"),
-        caption="Office Secret Auto Bot မှ ကြိုဆိုပါတယ် 👋"
-    )
+    # 📷 ပုံပို့ (start.jpg မရှိရင် skip)
+    if os.path.exists("start.jpg"):
+        await update.message.reply_photo(
+            photo=open("start.jpg", "rb"),
+            caption="Office Secret Auto Bot မှ ကြိုဆိုပါတယ် 👋"
+        )
+    else:
+        await update.message.reply_text("Office Secret Auto Bot မှ ကြိုဆိုပါတယ် 👋")
 
     # 🔘 Button + Text
     keyboard = [[InlineKeyboardButton("နံပါတ်ရွေးချယ်ပါ", callback_data="choose_number")]]
@@ -62,27 +66,20 @@ async def process_star(number_key: str, update_obj, context: ContextTypes.DEFAUL
     if number_key not in user_data:
         user_data[number_key] = {
             "count": 1,
-            "last_time": datetime.now(),
             "employee": EMPLOYEES[int(number_key[3:]) - 1]
         }
         color = COLOR_SEQUENCE[0]
-        start_time = user_data[number_key]["last_time"].strftime("%H:%M")
-        await update_obj.reply_text(f"{color} {user_data[number_key]['employee']} {start_time}")
+        now = datetime.now()
+        await update_obj.reply_text(f"{color} {user_data[number_key]['employee']} {now.strftime('%H:%M')}")
         return
 
     info = user_data[number_key]
-    now = datetime.now()
-    prev_time = info["last_time"]
-    info["last_time"] = now
     info["count"] += 1
-
     color = COLOR_SEQUENCE[(info["count"] - 1) % len(COLOR_SEQUENCE)]
+    now = datetime.now()
 
-    if info["count"] % 2 == 1:
-        await update_obj.reply_text(f"{color} {info['employee']} {now.strftime('%H:%M')}")
-    else:
-        delta_min = int((now - prev_time).total_seconds() / 60)
-        await update_obj.reply_text(f"{color} {info['employee']} {delta_min} မိနစ်ကြာမြင့်သည်")
+    # အမြဲလက်ရှိ အချိန်သာ ပေးမယ်
+    await update_obj.reply_text(f"{color} {info['employee']} {now.strftime('%H:%M')}")
 
 # ---------------- BUTTON HANDLER ----------------
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -106,5 +103,3 @@ app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler)
 
 print("Bot is running...")
 app.run_polling()
-
-# OfficeSecretAutoBot Code
