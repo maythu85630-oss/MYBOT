@@ -1,11 +1,11 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, MessageHandler, ContextTypes, filters
 from datetime import datetime
-import os
-
+from zoneinfo import ZoneInfo  # Python 3.9+
 # ---------- CONFIG ----------
 API_ID = 38016148            # my.telegram.org မှ
 API_HASH = "2239cc376facdb84cb5b7f2f1d7bf002"
+
 BOT_TOKEN = "8431786252:AAFFLfJiExGfB7FRulS_Pl83XUO_PXME6cQ"
 
 # Provided employee list
@@ -35,24 +35,19 @@ EMPLOYEES = [
     "LAMIN THIDAR HTWE"
 ]
 
-# Fill up to 200
+# fill up to 200
 while len(EMPLOYEES) < 200:
     EMPLOYEES.append(f"Employee{len(EMPLOYEES)+1}")
 
-COLOR_SEQUENCE = ["🟢", "🟢", "🟡", "🟡", "🔴", "🔴"]
+COLOR_SEQUENCE = ["🟢","🟢","🟡","🟡","🔴","🔴"]
 
 # ---------------- START ----------------
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # 📷 ပုံပို့ (start.jpg မရှိရင် skip)
-    if os.path.exists("start.jpg"):
-        await update.message.reply_photo(
-            photo=open("start.jpg", "rb"),
-            caption="Office Secret Auto Bot မှ ကြိုဆိုပါတယ် 👋"
-        )
-    else:
-        await update.message.reply_text("Office Secret Auto Bot မှ ကြိုဆိုပါတယ် 👋")
+    await update.message.reply_photo(
+        photo=open("start.jpg", "rb"),
+        caption="Office Secret Auto Bot မှ ကြိုဆိုပါတယ် 👋"
+    )
 
-    # 🔘 Button + Text
     keyboard = [[InlineKeyboardButton("နံပါတ်ရွေးချယ်ပါ", callback_data="choose_number")]]
     await update.message.reply_text(
         "နံပါတ်ကို 1 မှ 200 အထိ ရိုက်ထည့်နိုင်ပါတယ်။",
@@ -63,23 +58,33 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def process_star(number_key: str, update_obj, context: ContextTypes.DEFAULT_TYPE):
     user_data = context.user_data.setdefault("clicks", {})
 
+    my_timezone = ZoneInfo("Asia/Yangon")  # Yangon time zone
+
     if number_key not in user_data:
+        now = datetime.now(my_timezone)
         user_data[number_key] = {
             "count": 1,
+            "last_time": now,
             "employee": EMPLOYEES[int(number_key[3:]) - 1]
         }
         color = COLOR_SEQUENCE[0]
-        now = datetime.now()
-        await update_obj.reply_text(f"{color} {user_data[number_key]['employee']} {now.strftime('%H:%M')}")
+        start_time = now.strftime("%H:%M")
+        await update_obj.reply_text(f"{color} {user_data[number_key]['employee']} {start_time}")
         return
 
     info = user_data[number_key]
+    now = datetime.now(my_timezone)
+    prev_time = info["last_time"]
+    info["last_time"] = now
     info["count"] += 1
-    color = COLOR_SEQUENCE[(info["count"] - 1) % len(COLOR_SEQUENCE)]
-    now = datetime.now()
 
-    # အမြဲလက်ရှိ အချိန်သာ ပေးမယ်
-    await update_obj.reply_text(f"{color} {info['employee']} {now.strftime('%H:%M')}")
+    color = COLOR_SEQUENCE[(info["count"] - 1) % len(COLOR_SEQUENCE)]
+
+    if info["count"] % 2 == 1:
+        await update_obj.reply_text(f"{color} {info['employee']} {now.strftime('%H:%M')}")
+    else:
+        delta_min = int((now - prev_time).total_seconds() / 60)
+        await update_obj.reply_text(f"{color} {info['employee']} {delta_min} မိနစ်ကြာမြင့်သည်")
 
 # ---------------- BUTTON HANDLER ----------------
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
