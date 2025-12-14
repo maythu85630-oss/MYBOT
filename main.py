@@ -47,12 +47,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         photo=open("start.jpg", "rb"),
         caption="Welcome To Office Secret Auto Bot  👋"
     )
-
-
-
-    keyboard = [[InlineKeyboardButton("သိရှိလိုပါက", callback_data="choose_number")]]
+    # 🔘 Button + Text
+    keyboard = [[InlineKeyboardButton("နံပါတ်ရွေးချယ်ပါ", callback_data="choose_number")]]
     await update.message.reply_text(
-        "",  # ✨ ဖျက်လိုက်တဲ့စာ
+        "နံပါတ်ကို 1 မှ 200 အထိ ရိုက်ထည့်နိုင်ပါတယ်.......",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
@@ -111,5 +109,6 @@ app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler)
 
 print("Bot is running...")
 app.run_polling()
+
 
 
