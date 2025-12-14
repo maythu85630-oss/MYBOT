@@ -48,12 +48,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         caption="Welcome To Office Secret Auto Bot  👋"
     )
 
-keyboard = [[InlineKeyboardButton("သိရှိလိုပါက", callback_data="choose_number")]]
-    await update.message.reply_text(
-        "",  # ✨ ဖျက်လိုက်တဲ့စာ
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
-
 # ---------------- PROCESS NUMBER ----------------
 async def process_star(number_key: str, update_obj, context: ContextTypes.DEFAULT_TYPE):
     user_data = context.user_data.setdefault("clicks", {})
@@ -108,3 +102,4 @@ app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler)
 
 print("Bot is running...")
 app.run_polling()
+
